@@ -1,1 +1,3 @@
 # pyWSSE
+
+pip install pycurl
