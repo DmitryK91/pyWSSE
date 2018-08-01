@@ -2,6 +2,7 @@ from WSSEGen import GetHeader
 import os
 import pycurl
 import json
+import sys
 
 
 res_path = os.path.expanduser(
@@ -46,7 +47,6 @@ def Request(req_type, header, url):
         code = curl.getinfo(pycurl.RESPONSE_CODE)
 
         curl.close()
-        outfile.close()
 
     return (code)
 
@@ -60,13 +60,30 @@ def GetData():
 
 
 if __name__ == '__main__':
-    req_type = 'GET'
-    user = ''
-    password = ''
-    uri = 'https://217.74.37.156/api/v2.6.0/areas'
+    if len(sys.argv) < 9:
+        print('Use:\n\t'
+              'python REST.py -r <GET/PUT> -u <USER> -p <PASSWORD> -a <URI>')
+        sys.exit()
+    else:
+        i = 1
+        while i < len(sys.argv):
+            if sys.argv[i] == '-u':
+                i += 1
+                user = sys.argv[i]
+            elif sys.argv[i] == '-p':
+                i += 1
+                password = sys.argv[i]
+            elif sys.argv[i] == '-r':
+                i += 1
+                req_type = sys.argv[i]
+            elif sys.argv[i] == '-a':
+                i += 1
+                uri = sys.argv[i]
+            i += 1
 
     result = Request(req_type, Header(user, password), uri)
 
-    os.startfile(res_path)
+    if os.path.exists(res_path):
+        os.startfile(res_path)
 
     print(result)
