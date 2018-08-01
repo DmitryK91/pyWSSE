@@ -60,10 +60,10 @@ def GetData():
 
 
 if __name__ == '__main__':
-    req_type = 'PUT'
-    user = 'alunev1'
-    password = 'eoebFJXUot2z5J6QiCaMmwhOxuM='
-    uri = 'https://217.74.37.156/api/v2.6.0/activities'
+    req_type = 'GET'
+    user = ''
+    password = ''
+    uri = 'https://217.74.37.156/api/v2.6.0/areas'
 
     result = Request(req_type, Header(user, password), uri)
 
