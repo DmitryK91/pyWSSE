@@ -1,7 +1,8 @@
 # pyWSSE
 
-pip install pycurl
+Python 3.6
 
+pip install pycurl  
 pip install hashlib
 
 Use:
