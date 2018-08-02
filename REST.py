@@ -58,7 +58,7 @@ if __name__ == '__main__':
     if len(sys.argv) < 9:
         print('USE:\t\n'
               '\tpython REST.py\t\n'
-              '\t\t-r - GET/PUT.\t\n'
+              '\t\t-t - GET/PUT.\t\n'
               '\t\t-u - username.\t\n'
               '\t\t-p - password hash.\t\n'
               '\t\t-a - URI.\t\n'
