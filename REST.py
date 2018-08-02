@@ -68,6 +68,8 @@ if __name__ == '__main__':
         sys.exit()
     else:
         data = ''
+        res_path = os.path.expanduser(
+            os.getenv('USERPROFILE')) + '\\Documents\\Result.txt'
         i = 1
         while i < len(sys.argv):
             if sys.argv[i] == '-u':
@@ -89,10 +91,6 @@ if __name__ == '__main__':
                 i += 1
                 res_path = sys.argv[i]
             i += 1
-
-    if res_path is None:
-        res_path = os.path.expanduser(
-            os.getenv('USERPROFILE')) + '\\Documents\\Result.txt'
 
     result = Request(req_type, Header(user, password), uri, data, res_path)
 
