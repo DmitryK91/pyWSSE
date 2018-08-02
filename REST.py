@@ -5,12 +5,6 @@ import json
 import sys
 
 
-res_path = os.path.expanduser(
-    os.getenv('USERPROFILE')) + '\\Documents\\Result.txt'
-data_path = os.path.expanduser(
-    os.getenv('USERPROFILE')) + '\\Documents\\Data.json'
-
-
 def Header(User, Pass):
     h = GetHeader(User, Pass)
     wsse = ('UsernameToken Username="{}" PasswordDigest="{}" Nonce="{}" '
@@ -26,7 +20,7 @@ def Header(User, Pass):
     ]
 
 
-def Request(req_type, header, url):
+def Request(req_type, header, url, data, res_path):
     with open(res_path, 'wb') as outfile:
         curl = pycurl.Curl()
         curl.setopt(pycurl.URL, url)
@@ -36,11 +30,12 @@ def Request(req_type, header, url):
         curl.setopt(pycurl.WRITEDATA, outfile)
 
         curl.setopt(pycurl.CUSTOMREQUEST, req_type)
+        curl.setopt(pycurl.VERBOSE, 1)
 
         if req_type == 'PUT':
-            curl.setopt(pycurl.POSTFIELDS, GetData())
-
-        curl.setopt(pycurl.VERBOSE, 1)
+            if data == '':
+                raise Exception('Data is None')
+            curl.setopt(pycurl.POSTFIELDS, data)
 
         curl.perform()
 
@@ -51,7 +46,7 @@ def Request(req_type, header, url):
     return (code)
 
 
-def GetData():
+def GetData(data_path):
     with open(data_path, 'r', encoding='utf-8') as outfile:
         json_data = json.loads(outfile.read())
         outfile.close()
@@ -61,10 +56,18 @@ def GetData():
 
 if __name__ == '__main__':
     if len(sys.argv) < 9:
-        print('Use:\n\t'
-              'python REST.py -r <GET/PUT> -u <USER> -p <PASSWORD> -a <URI>')
+        print('USE:\t\n'
+              '\tpython REST.py\t\n'
+              '\t\t-r - GET/PUT.\t\n'
+              '\t\t-u - username.\t\n'
+              '\t\t-p - password hash.\t\n'
+              '\t\t-a - URI.\t\n'
+              '\t\t-d - file Json format. Only for PUT.\t\n'
+              '\t\t-r - results file. Optional, '
+              'default: <USERPROFILE>/Documents/Result.txt')
         sys.exit()
     else:
+        data = ''
         i = 1
         while i < len(sys.argv):
             if sys.argv[i] == '-u':
@@ -73,15 +76,25 @@ if __name__ == '__main__':
             elif sys.argv[i] == '-p':
                 i += 1
                 password = sys.argv[i]
-            elif sys.argv[i] == '-r':
+            elif sys.argv[i] == '-t':
                 i += 1
                 req_type = sys.argv[i]
             elif sys.argv[i] == '-a':
                 i += 1
                 uri = sys.argv[i]
+            elif sys.argv[i] == '-d':
+                i += 1
+                data = GetData(sys.argv[i])
+            elif sys.argv[i] == '-r':
+                i += 1
+                res_path = sys.argv[i]
             i += 1
 
-    result = Request(req_type, Header(user, password), uri)
+    if res_path is None:
+        res_path = os.path.expanduser(
+            os.getenv('USERPROFILE')) + '\\Documents\\Result.txt'
+
+    result = Request(req_type, Header(user, password), uri, data, res_path)
 
     if os.path.exists(res_path):
         os.startfile(res_path)
