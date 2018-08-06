@@ -3,9 +3,12 @@ import os
 import pycurl
 import json
 import sys
+import io
 
 
 def Header(User, Pass):
+    """Get WSSE Header"""
+
     h = GetHeader(User, Pass)
     wsse = ('UsernameToken Username="{}" PasswordDigest="{}" Nonce="{}" '
             'Created="{}"'.format(h[0], h[1], h[2], h[3]))
@@ -20,36 +23,39 @@ def Header(User, Pass):
     ]
 
 
-def Request(req_type, header, url, data, res_path):
-    with open(res_path, 'wb') as outfile:
-        curl = pycurl.Curl()
-        curl.setopt(pycurl.URL, url)
-        curl.setopt(pycurl.SSL_VERIFYPEER, 0)
-        curl.setopt(pycurl.SSL_VERIFYHOST, 0)
-        curl.setopt(pycurl.HTTPHEADER, header)
-        curl.setopt(pycurl.WRITEDATA, outfile)
+def Request(req_type, header, url, data=''):
+    out = io.BytesIO()
 
-        curl.setopt(pycurl.CUSTOMREQUEST, req_type)
-        curl.setopt(pycurl.VERBOSE, 1)
+    curl = pycurl.Curl()
+    curl.setopt(pycurl.URL, url)
+    curl.setopt(pycurl.SSL_VERIFYPEER, 0)
+    curl.setopt(pycurl.SSL_VERIFYHOST, 0)
+    curl.setopt(pycurl.HTTPHEADER, header)
+    curl.setopt(pycurl.WRITEDATA, out)
 
-        if req_type == 'PUT':
-            if data == '':
-                raise Exception('Data is None')
-            curl.setopt(pycurl.POSTFIELDS, data)
+    curl.setopt(pycurl.CUSTOMREQUEST, req_type)
+    curl.setopt(pycurl.VERBOSE, 1)
 
-        curl.perform()
+    if req_type == 'PUT':
+        if data == '':
+            raise Exception('Data is None')
+        curl.setopt(pycurl.POSTFIELDS, data)
 
-        code = curl.getinfo(pycurl.RESPONSE_CODE)
+    curl.perform()
 
-        curl.close()
+    code = curl.getinfo(pycurl.RESPONSE_CODE)
 
-    return (code)
+    curl.close()
+
+    result = str(out.getvalue(), 'utf-8')
+    return (str(code) + '\n' + result)
 
 
 def GetData(data_path):
+    """Get Data from File"""
+
     with open(data_path, 'r', encoding='utf-8') as outfile:
         json_data = json.loads(outfile.read())
-        outfile.close()
 
     return json.dumps(json_data)
 
@@ -67,10 +73,10 @@ if __name__ == '__main__':
               'default: <USERPROFILE>/Documents/Result.txt')
         sys.exit()
     else:
-        data = ''
-        res_path = os.path.expanduser(
-            os.getenv('USERPROFILE')) + '\\Documents\\Result.txt'
         i = 1
+        data = None
+        res_path = None
+
         while i < len(sys.argv):
             if sys.argv[i] == '-u':
                 i += 1
@@ -92,9 +98,14 @@ if __name__ == '__main__':
                 res_path = sys.argv[i]
             i += 1
 
-    result = Request(req_type, Header(user, password), uri, data, res_path)
+    try:
+        result = Request(req_type, Header(user, password), uri, data)
 
-    if os.path.exists(res_path):
-        os.startfile(res_path)
-
-    print(result)
+        if res_path != '':
+            with open(res_path, 'w') as outfile:
+                outfile.write(result)
+            os.startfile(res_path)
+        else:
+            print(result)
+    except Exception as ex:
+        print(str(ex))

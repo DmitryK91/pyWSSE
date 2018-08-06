@@ -1,6 +1,8 @@
 # pyWSSE
 
-REST client with WSSE header.
+REST.py - REST client with WSSE header.  
+WSSEGen.py - WSSE header generate.  
+main.py - Show GUI.  
 
 ## Requirements:
 
@@ -11,6 +13,8 @@ pip install hashlib
 
 ## Use:
 
+python main.py
+
 python REST.py  
 -t - GET/PUT.  
 -u - username.  
@@ -18,3 +22,7 @@ python REST.py
 -a - URI.  
 -d - file Json format. Only for PUT.  
 -r - results file. Optional, default: <USERPROFILE>/Documents/Result.txt
+
+python WSSEGen.py  
+-u <USER>  
+-p <PASSWORD>  
