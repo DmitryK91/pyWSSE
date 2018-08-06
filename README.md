@@ -8,8 +8,7 @@ main.py - Show GUI.
 
 Python 3.6
 
-pip install pycurl  
-pip install hashlib
+pip install pycurl, PyQt5, hashlib
 
 ## Use:
 
@@ -24,5 +23,5 @@ python REST.py
 -r - results file. Optional, default: <USERPROFILE>/Documents/Result.txt
 
 python WSSEGen.py  
--u <USER>  
--p <PASSWORD>  
+-u - username.  
+-p - password hash    
