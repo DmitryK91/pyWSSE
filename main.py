@@ -1,52 +1,76 @@
 import sys
 from REST import Header, Request
-from PyQt5 import uic
+from PyQt5 import QtCore, uic
 from PyQt5.QtWidgets import QApplication, QMainWindow
 
 
 class AppWindow(QMainWindow):
     def __init__(self):
-        super().__init__()
+        super(AppWindow, self).__init__()
         uic.loadUi("design.ui", self)
 
-        self.cbType.addItems(self.paramList())
-        self.cbType.currentTextChanged.connect(self.onCurrentTextChanged)
-        self.teData.setEnabled(self.cbType.currentText == 'PUT')
+        self.cbServer.addItems(self.serverList)
 
-        self.teResult.setVisible(False)
-        self.scrollArea.setVisible(False)
+        self.cbType.addItems(self.paramList)
+        self.cbType.currentTextChanged.connect(self.onCurrentTextChanged)
+
+        self.expand(False)
 
         self.btnSend.clicked.connect(self.send)
+
+        self.btnExpand.clicked.connect(
+            lambda: self.expand(not self.teResult.isVisible()))
+
+    paramList = ['GET', 'PUT']
+
+    serverList = {
+        'QA': '10.21.17.211',
+        'Dev': '217.74.37.156',
+        'Prod': '10.21.17.210'
+    }
+
+    def getServer(self):
+        server = self.serverList.get(self.cbServer.currentText())
+        if not server:
+            server = self.cbServer.currentText()
+        return server
 
     def send(self):
         """Send request"""
 
-        self.scrollArea.setVisible(True)
-        self.teResult.setVisible(True)
+        self.expand(True)
         self.teResult.clear()
+
+        uri = (self.leDomen.text() + self.getServer()
+               + self.leVersion.text() + self.leAPI.text())
 
         try:
             header = Header(self.leUserName.text(), self.lePassword.text())
-            result = Request(self.cbType.currentText(),
-                             header,
-                             self.leUri.text(),
-                             self.teData.toPlainText())
+            self.SetText(Request(self.cbType.currentText(),
+                                 header, uri, self.teData.toPlainText()))
         except Exception as ex:
-            result = ex
+            self.teResult.append(str(ex))
 
-        self.teResult.append(str(result))
+    def SetText(self, result):
+        if result[0] == '200':
+            code = ('<div style="font-size:large; color:green">'
+                    + result[0] + '</div>')
+        else:
+            code = ('<div style="font-size:large; color:red">'
+                    + result[0] + '</div>')
 
-    def paramList(self):
-        """Request types combo box"""
-
-        G = 'GET'
-        P = 'PUT'
-
-        allParams = [G, P]
-        return allParams
+        self.teResult.append(code)
+        self.teResult.append(result[1])
 
     def onCurrentTextChanged(self, text):
         self.teData.setEnabled(str(text) == 'PUT')
+
+    def expand(self, exp):
+        self.teResult.setVisible(exp)
+        if exp:
+            self.btnExpand.setArrowType(QtCore.Qt.RightArrow)
+        else:
+            self.btnExpand.setArrowType(QtCore.Qt.LeftArrow)
 
 
 if __name__ == '__main__':

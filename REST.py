@@ -39,7 +39,7 @@ def Request(req_type, header, url, data=''):
     if req_type == 'PUT':
         if data == '':
             raise Exception('Data is None')
-        curl.setopt(pycurl.POSTFIELDS, data)
+        curl.setopt(pycurl.POSTFIELDS, toNormal(data))
 
     curl.perform()
 
@@ -47,17 +47,22 @@ def Request(req_type, header, url, data=''):
 
     curl.close()
 
-    result = str(out.getvalue(), 'utf-8')
-    return (str(code) + '\n' + result)
+    return [str(code), toNormal(str(out.getvalue(), 'utf-8'))]
 
 
 def GetData(data_path):
     """Get Data from File"""
 
     with open(data_path, 'r', encoding='utf-8') as outfile:
-        json_data = json.loads(outfile.read())
+        json_data = outfile.read()
 
-    return json.dumps(json_data)
+    return json_data
+
+
+def toNormal(data):
+    data = json.loads(data)
+    data = json.dumps(data, indent=4)
+    return data
 
 
 if __name__ == '__main__':
@@ -106,6 +111,6 @@ if __name__ == '__main__':
                 outfile.write(result)
             os.startfile(res_path)
         else:
-            print(result)
+            print(result[0] + '\n' + result[1])
     except Exception as ex:
         print(str(ex))
