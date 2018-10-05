@@ -1,7 +1,7 @@
 import sys
 from REST import Header, Request
 from PyQt5 import QtCore, uic
-from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
 
 
 class AppWindow(QMainWindow):
@@ -19,7 +19,9 @@ class AppWindow(QMainWindow):
         self.btnSend.clicked.connect(self.send)
 
         self.btnExpand.clicked.connect(
-            lambda: self.expand(not self.teResult.isVisible()))
+            lambda: self.expand(not self.rBar.isVisible()))
+
+        self.btnSave.clicked.connect(self.save)
 
     paramList = ['GET', 'PUT']
 
@@ -28,6 +30,14 @@ class AppWindow(QMainWindow):
         'Dev': '217.74.37.156',
         'Prod': '10.21.17.210'
     }
+
+    def save(self):
+        path = QFileDialog.getSaveFileName()[0]
+
+        if path:
+            f = open(path, 'w')
+            f.write(self.teResult.toPlainText())
+            f.close()
 
     def getServer(self):
         server = self.serverList.get(self.cbServer.currentText())
@@ -66,10 +76,11 @@ class AppWindow(QMainWindow):
         self.teData.setEnabled(str(text) == 'PUT')
 
     def expand(self, exp):
-        self.teResult.setVisible(exp)
         if exp:
+            self.rBar.show()
             self.btnExpand.setArrowType(QtCore.Qt.RightArrow)
         else:
+            self.rBar.hide()
             self.btnExpand.setArrowType(QtCore.Qt.LeftArrow)
 
 

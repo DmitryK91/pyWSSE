@@ -23,7 +23,7 @@ def Header(User, Pass):
     ]
 
 
-def Request(req_type, header, url, data=''):
+def Request(req_type, header, url, data=None):
     out = io.BytesIO()
 
     curl = pycurl.Curl()
@@ -36,10 +36,10 @@ def Request(req_type, header, url, data=''):
     curl.setopt(pycurl.CUSTOMREQUEST, req_type)
     curl.setopt(pycurl.VERBOSE, 1)
 
-    if req_type == 'PUT':
-        if data == '':
-            raise Exception('Data is None')
+    if data:
         curl.setopt(pycurl.POSTFIELDS, toNormal(data))
+    elif req_type == 'PUT':
+        raise Exception('Data is None')
 
     curl.perform()
 
